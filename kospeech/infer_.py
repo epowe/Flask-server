@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+from random import sample
 
 import argparse
 from typing_extensions import Required
@@ -34,7 +36,7 @@ from kospeech.models import (
 
 def parse_audio(audio_path: str, del_silence: bool = False, audio_extension: str = 'pcm') -> Tensor:
     signal = load_audio(audio_path, del_silence, extension=audio_extension)
-    print(len(signal))
+    # print(len(signal))
     feature = torchaudio.compliance.kaldi.fbank(
         waveform=Tensor(signal).unsqueeze(0),
         num_mel_bins=80,
@@ -52,16 +54,11 @@ def parse_audio(audio_path: str, del_silence: bool = False, audio_extension: str
 
 
 def pred_sentence(audio_path,model_path,device):
-    audio_path = 'E:\DKSL_main\DKSR20000890.1.1.21\DKSR20000890.1.1.21.pcm'
-    model_path = 'kospeech/outputs/2022-04-30/12-03-24/model.pt'
-    # model_path = "C:\Users\hyunsoo\epowe\kospeech\outputs\2022-04-30\12-03-24\model.pt"
-
     device = torch.device('cpu')
     feature = parse_audio(audio_path,del_silence=True)
-    print(feature)
 
     input_length = torch.LongTensor([len(feature)])
-    vocab = KsponSpeechVocabulary('kospeech/data/vocab/aihub_character_vocabs.csv')
+    vocab = KsponSpeechVocabulary('../kospeech/data/vocab/aihub_character_vocabs.csv')
 
 
     model = torch.load(model_path, map_location=lambda storage, loc: storage).to(device)
@@ -86,3 +83,22 @@ def pred_sentence(audio_path,model_path,device):
     return sentence
     # print(sentence)
     # print("finish")
+
+
+nums = 5
+d_path = 'E:\DKSL_main'
+datas = os.listdir(d_path)
+datas = sample(datas,nums)
+model_path = 'outputs/model.pt'
+device = torch.device('cpu')
+
+
+for data in datas:
+    audio_path = os.path.join(d_path,data,data+'.pcm')
+    txt_path = os.path.join(d_path,data,data+'.txt')
+    with open(txt_path,'r') as f:
+        s = f.readline()
+    print('target:',s)
+    sentence = pred_sentence(audio_path, model_path, device)
+    print('pred:',sentence[0])
+    print('-'*20)
