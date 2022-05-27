@@ -33,6 +33,7 @@ from kospeech.models import (
     Conformer,
 )
 
+from hanspell import spell_checker
 
 def parse_audio(audio_path: str, del_silence: bool = False, audio_extension: str = 'pcm') -> Tensor:
     signal = load_audio(audio_path, del_silence, extension=audio_extension)
@@ -84,21 +85,38 @@ def pred_sentence(audio_path,model_path,device):
     # print(sentence)
     # print("finish")
 
-
-nums = 5
-d_path = 'E:\DKSL_main'
-datas = os.listdir(d_path)
-datas = sample(datas,nums)
-model_path = 'outputs/model.pt'
-device = torch.device('cpu')
-
-
-for data in datas:
-    audio_path = os.path.join(d_path,data,data+'.pcm')
-    txt_path = os.path.join(d_path,data,data+'.txt')
-    with open(txt_path,'r') as f:
-        s = f.readline()
-    print('target:',s)
-    sentence = pred_sentence(audio_path, model_path, device)
-    print('pred:',sentence[0])
-    print('-'*20)
+#
+# nums = 5
+# d_path = 'E:\DKSL_main'
+# d_path2 = 'E:\sample\Kspon_total\\tot'
+# datas = os.listdir(d_path)
+# datas = sample(datas,nums)
+# datas2 = os.listdir(d_path2)
+# datas2 = sample(datas2,nums)
+# model_path = 'outputs/2022-04-30/12-03-24/model_ds2.pt'
+# # model_path = 'outputs/2022-04-30/model.pt'
+# device = torch.device('cpu')
+#
+# print('경상도 테스트')
+# for data in datas:
+#     audio_path = os.path.join(d_pcdath,data,data+'.pcm')
+#     txt_path = os.path.join(d_path,data,data+'.txt')
+#     with open(txt_path,'r') as f:
+#         s = f.readline()
+#     print('target:',s)
+#     sentence = pred_sentence(audio_path, model_path, device)[0]
+#     print('pred:',sentence)
+#     print('spell check:',spell_checker.check(sentence).as_dict()['checked'])
+#     print('-'*20)
+#
+# print('표준어 테스트')
+# for data in datas2:
+#     audio_path = os.path.join(d_path2,data,data+'.pcm')
+#     txt_path = os.path.join(d_path2,data,data+'.txt')
+#     with open(txt_path,'r') as f:
+#         s = f.readline()
+#     print('target:',s)
+#     sentence = pred_sentence(audio_path, model_path, device)[0]
+#     print('pred:',sentence)
+#     print('spell check:',spell_checker.check(sentence).as_dict()['checked'])
+#     print('-'*20)

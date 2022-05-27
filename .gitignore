@@ -186,3 +186,6 @@ pip-selfcheck.json
 # model
 kospeech/outputs/
 kospeech/data/
+
+#hanspell
+hanspell/
