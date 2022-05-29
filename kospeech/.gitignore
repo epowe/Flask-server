@@ -5,6 +5,7 @@ data/sample/*
 data/data_list/debug_list.csv
 data/data_list/sample_list.csv
 trained_model/
+test_data/
 *.bin
 *.zip
 *.idea
