@@ -100,7 +100,7 @@ def pred_sentence(audio_path,model_path,device):
     # print(sentence)
     # print("finish")
 
-
+#
 # nums = 5
 # d_path = 'E:\DKSL_main'
 # d_path2 = 'E:\sample\Kspon_total\\tot'
@@ -122,7 +122,7 @@ def pred_sentence(audio_path,model_path,device):
 #     print('target:',s)
 #     sentence = pred_sentence(audio_path, model_path, device)[0]
 #     print('pred:',sentence)
-#     print('pred2:', revise(sentence))
+#     # print('pred2:', revise(sentence))
 #     print('spell check:',spell_checker.check(sentence).as_dict()['checked'])
 #     print('-'*20)
 #
@@ -135,6 +135,6 @@ def pred_sentence(audio_path,model_path,device):
 #     print('target:',s)
 #     sentence = pred_sentence(audio_path, model_path, device)[0]
 #     print('pred:',sentence)
-#     print('pred2:', revise(sentence))
+#     # print('pred2:', revise(sentence))
 #     print('spell check:',spell_checker.check(sentence).as_dict()['checked'])
 #     print('-'*20)
