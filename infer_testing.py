@@ -18,7 +18,7 @@ for data in d:
     audio_path = os.path.join(d_path,data)
     txt = data[:-3] + 'txt'
     txt_path = os.path.join(d_path,txt)
-    with open(txt_path, 'r') as f:
+    with open(txt_path, 'r',encoding='utf-8') as f:
         s = f.readline()
     print('target:', s)
     sentence = pred_sentence(audio_path, model_path, device)[0]
