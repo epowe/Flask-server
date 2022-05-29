@@ -76,7 +76,7 @@ def pred_sentence(audio_path,model_path,device):
     feature = parse_audio(audio_path,del_silence=True)
 
     input_length = torch.LongTensor([len(feature)])
-    vocab = KsponSpeechVocabulary('/kospeech/data/vocab/aihub_character_vocabs.csv')
+    vocab = KsponSpeechVocabulary('kospeech/data/vocab/aihub_character_vocabs.csv')
 
 
     model = torch.load(model_path, map_location=lambda storage, loc: storage).to(device)
