@@ -4,7 +4,7 @@ import os
 from hanspell import spell_checker
 
 device = torch.device('cpu')
-model_path = 'kospeech/trained_model/model.pt'
+model_path = 'kospeech/trained_model/model_ds2.pt'
 d_path = 'kospeech/test_data/test_data'
 
 d = os.listdir(d_path)
