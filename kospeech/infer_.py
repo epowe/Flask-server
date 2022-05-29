@@ -32,6 +32,8 @@ from kospeech.models import (
     ListenAttendSpell,
     Conformer,
 )
+import sys
+sys.path.append('../')
 
 from hanspell import spell_checker
 
