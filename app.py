@@ -2,10 +2,11 @@ from flask import Flask
 
 app = Flask(__name__)
 
-@app.route('/')
-def hello():
-    return 'Hello, My First Flask!'
+@app.route('/model/dialectAnalysis', methods = ["POST"])
+def dialectAnalysis():
 
-@app.route('/hello')
+    return "json([{},{}])"
+
+@app.route('/model/dialectData', methods = ["GET"])
 def new_hello():
     return 'new_hello'
