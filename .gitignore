@@ -189,3 +189,5 @@ kospeech/data/
 
 #hanspell
 hanspell/
+
+config.py
