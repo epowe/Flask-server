@@ -1,7 +1,6 @@
 # from kospeech.infer_ import pred_sentence
 
 from flask import Flask, request, jsonify
-from sqlalchemy import create_engine, text
 from connections import db_connector
 import jwt
 
@@ -168,7 +167,40 @@ def getQuestionList():
 
 @app.route('/model/data/detail', methods= ["GET"])
 def getDataDetail():
-    return ''
+    userToken = request.headers['userToken']
+    data = jwt.decode(userToken, "asdlfjasdfasd", algorithms="HS256")
+    userIdx = data["userIdx"]
+    title = request.args.get("title")
+    question = request.args.get("question")
+    try:
+        with db.cursor() as cursor:
+            query = """
+                    select video.video_url, videoFeedback.dialect_time, videoFeedback.dialect_string, videoFeedback.feedback from Video
+                    inner join VideoFeedback on Video.id = VideoFeedback.video_id
+                    where video_info_id = (select id from videoInfo where user_id = %d and title = "%s")
+                    and video.question = "%s"
+                            """ % (userIdx, title, question)
+            cursor.execute(query)
+            result = cursor.fetchall()
+            db.commit()
+    finally:
+        cursor.close()
+    videoUrl = ""
+    detail = []
+    for url, dialectTime, dialectString, feedback in result:
+        videoUrl = url
+        data = {
+            "dialectTime" : str(dialectTime),
+            "dialectString" : dialectString,
+            "feedback" : feedback
+        }
+        detail.append(data)
+
+    json = {
+        "videoUrl": videoUrl,
+        "detail" : detail
+    }
+    return jsonify(json), 200
 
 
 if __name__ == "__main__":
