@@ -53,18 +53,58 @@ def getDataScore():
             intonation, speechRate, word, dialectCount = cursor.fetchone()
             db.commit()
     finally:
-        db.close()
+        cursor.close()
     json = {
         "intonation"   : intonation,
         "speechRate"   : speechRate,
         "word"         : word,
-        "dialectCount" :dialectCount
+        "dialectCount" : dialectCount
     }
     return jsonify(json), 200
 
 @app.route('/model/score/average', methods= ["GET"])
 def getDataScoreAverage():
-    return ''
+    userToken = request.headers['userToken']
+    data = jwt.decode(userToken, "asdlfjasdfasd", algorithms="HS256")
+    userIdx = data["userIdx"]
+    try:
+        with db.cursor() as cursor:
+            getVideoTableQuery = """
+                select speech_rate, intonation, word from videoInfo
+                where user_Id = %s
+                    """
+            getDialectCountQuery = """
+                select count(VideoFeedback.id)from users
+                inner join VideoInfo on users.id = VideoInfo.user_id  
+                inner join Video on VideoInfo.id = Video.video_info_id
+                inner join VideoFeedback on Video.id = VideoFeedback.video_id
+                where user_Id = %d
+            """ % (userIdx)
+            cursor.execute(getVideoTableQuery, (userIdx, ))
+            result = cursor.fetchall()
+            cursor.execute(getDialectCountQuery)
+            dialectCount = cursor.fetchone()[0]
+            db.commit()
+    finally:
+        cursor.close()
+    speechRateArr = []
+    intonationArr = []
+    wordArr = []
+    for speechRate, intonation, word in result:
+        speechRateArr.append(speechRate)
+        intonationArr.append(intonation)
+        wordArr.append(word)
+    videoCount = len(result)
+    speechRateAvg = sum(speechRateArr)/videoCount
+    intonationAvg = sum(intonationArr)/videoCount
+    dialectCountAvg = dialectCount/videoCount
+    json = {
+        "speechRateAvg" : speechRateAvg,
+        "intonationAvg" : intonationAvg,
+        "dialectCountAvg" : dialectCountAvg,
+        "wordArr" : wordArr
+    }
+    return jsonify(json), 200
 
 @app.route('/model/data/list', methods= ["GET"])
 def getDataList():
