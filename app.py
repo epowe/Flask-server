@@ -108,7 +108,39 @@ def getDataScoreAverage():
 
 @app.route('/model/data/list', methods= ["GET"])
 def getDataList():
-    return ''
+    userToken = request.headers['userToken']
+    data = jwt.decode(userToken, "asdlfjasdfasd", algorithms="HS256")
+    userIdx = data["userIdx"]
+    try:
+        with db.cursor() as cursor:
+            query = """
+                    select videoinfo.title, videoInfo.intonation as intonation, videoInfo.speech_rate as speechRate, videoInfo.word as word, count(*) from users
+                    inner join VideoInfo on users.id = VideoInfo.user_id  
+                    inner join Video on VideoInfo.id = Video.video_info_id
+                    inner join VideoFeedback on Video.id = VideoFeedback.video_id  
+                    where users.id = %d
+                    group by videoinfo.title, videoInfo.intonation, videoInfo.speech_rate, videoInfo.word
+                        """ % (userIdx)
+            cursor.execute(query)
+            result = cursor.fetchall()
+            db.commit()
+    finally:
+        cursor.close()
+    feedbackList = []
+    for title, intonation, speechRate, word, dialectCount in result:
+        data = {
+            "title" : title,
+            "intonation": intonation,
+            "speechRate": speechRate,
+            "word": word,
+            "dialectCount": dialectCount
+        }
+        feedbackList.append(data)
+    json = {
+        "feedbackList" : feedbackList
+    }
+    return jsonify(json), 200
+
 
 @app.route('/model/data/detail', methods= ["GET"])
 def getDataDetail():
