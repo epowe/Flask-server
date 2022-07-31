@@ -8,8 +8,6 @@ app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
 db = db_connector()
-# database = create_engine(app.config['DB_URL'], encoding = 'utf-8')
-# app.database = database
 
 json = {
     "userIdx" : 1,
