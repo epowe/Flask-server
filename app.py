@@ -141,6 +141,30 @@ def getDataList():
     }
     return jsonify(json), 200
 
+@app.route('/model/data/list/question', methods = ["GET"])
+def getQuestionList():
+    userToken = request.headers['userToken']
+    data = jwt.decode(userToken, "asdlfjasdfasd", algorithms="HS256")
+    userIdx = data["userIdx"]
+    title = request.args.get("title")
+    try:
+        with db.cursor() as cursor:
+            query = """
+                    select question from video
+                    where video_info_id = (select id from VideoInfo where title = '%s' and user_id = %d) 
+                        """ % (title, userIdx)
+            cursor.execute(query)
+            result= cursor.fetchall()
+            db.commit()
+    finally:
+        cursor.close()
+    questions = []
+    for question in result:
+        questions.append(*question)
+    json = {
+        "questions": questions,
+    }
+    return jsonify(json), 200
 
 @app.route('/model/data/detail', methods= ["GET"])
 def getDataDetail():
