@@ -17,7 +17,7 @@ json = {
 # 영상 데이터 받아서 사투리 관련 데이터 DB에 저장시키는 API
 @app.route('/model/video', methods = ["POST"])
 def dialectAnalysis():
-    Jwt = request.headers['Jwt']
+    Jwt = request.headers['accessToken']
 
     title = request.get_data().title
     question = request.get_data().question
@@ -27,13 +27,13 @@ def dialectAnalysis():
     print(title)
     print(question)
     print(videoURL)
-    print(request.headers['Jwt'])
+    print(Jwt)
     return request.get_json()
 
 @app.route('/model/data/score', methods = ["GET"])
 def getDataScore():
-    userToken = request.headers['userToken']
-    data = jwt.decode(userToken, "asdlfjasdfasd", algorithms= "HS256")
+    accessToken = request.headers['accessToken']
+    data = jwt.decode(accessToken, "asdlfjasdfasd", algorithms= "HS256")
     userIdx = data["userIdx"]
     title = request.args.get("title")
     try:
@@ -61,8 +61,8 @@ def getDataScore():
 
 @app.route('/model/score/average', methods= ["GET"])
 def getDataScoreAverage():
-    userToken = request.headers['userToken']
-    data = jwt.decode(userToken, "asdlfjasdfasd", algorithms="HS256")
+    accessToken = request.headers['accessToken']
+    data = jwt.decode(accessToken, "asdlfjasdfasd", algorithms="HS256")
     userIdx = data["userIdx"]
     try:
         with db.cursor() as cursor:
@@ -105,8 +105,8 @@ def getDataScoreAverage():
 
 @app.route('/model/data/list', methods= ["GET"])
 def getDataList():
-    userToken = request.headers['userToken']
-    data = jwt.decode(userToken, "asdlfjasdfasd", algorithms="HS256")
+    accessToken = request.headers['accessToken']
+    data = jwt.decode(accessToken, "asdlfjasdfasd", algorithms="HS256")
     userIdx = data["userIdx"]
     try:
         with db.cursor() as cursor:
@@ -140,8 +140,8 @@ def getDataList():
 
 @app.route('/model/data/list/question', methods = ["GET"])
 def getQuestionList():
-    userToken = request.headers['userToken']
-    data = jwt.decode(userToken, "asdlfjasdfasd", algorithms="HS256")
+    accessToken = request.headers['accessToken']
+    data = jwt.decode(accessToken, "asdlfjasdfasd", algorithms="HS256")
     userIdx = data["userIdx"]
     title = request.args.get("title")
     try:
@@ -165,8 +165,8 @@ def getQuestionList():
 
 @app.route('/model/data/detail', methods= ["GET"])
 def getDataDetail():
-    userToken = request.headers['userToken']
-    data = jwt.decode(userToken, "asdlfjasdfasd", algorithms="HS256")
+    accessToken = request.headers['accessToken']
+    data = jwt.decode(accessToken, "asdlfjasdfasd", algorithms="HS256")
     userIdx = data["userIdx"]
     title = request.args.get("title")
     question = request.args.get("question")
