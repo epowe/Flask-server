@@ -38,3 +38,7 @@ class mfcc_loader(BaseEstimator, TransformerMixin):
                                     n_mfcc=self.params['n_mfcc'])
         mfcc = np.mean(mfcc,axis=1).reshape(1,-1)
         return mfcc
+
+    def length(self,file_path,y=None):
+        mfcc = np.memmap(file_path, dtype='h', mode='r').astype('float32')
+        return len(mfcc) / self.params['sr']

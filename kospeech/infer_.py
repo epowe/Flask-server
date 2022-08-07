@@ -71,7 +71,7 @@ def parse_audio(audio_path: str, del_silence: bool = False, audio_extension: str
 
 
 
-def pred_sentence(audio_path,model_path,device):
+def pred_sentence(audio_path,model,device):
     device = torch.device('cpu')
     feature = parse_audio(audio_path,del_silence=True)
 
@@ -79,9 +79,9 @@ def pred_sentence(audio_path,model_path,device):
     vocab = KsponSpeechVocabulary('kospeech/data/vocab/aihub_character_vocabs.csv')
 
 
-    model = torch.load(model_path, map_location=lambda storage, loc: storage).to(device)
-    if isinstance(model, nn.DataParallel):
-        model = model.module
+    # model = torch.load(model_path, map_location=lambda storage, loc: storage).to(device)
+    # if isinstance(model, nn.DataParallel):
+    #     model = model.module
     model.eval()
 
 

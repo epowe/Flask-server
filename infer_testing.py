@@ -5,7 +5,13 @@ from hanspell import spell_checker
 
 device = torch.device('cpu')
 model_path = 'kospeech/trained_model/model_ds2.pt'
-d_path = 'kospeech/test_data/test_data'
+d_path = 'clf/test_data'
+
+
+model = torch.load(model_path, map_location=lambda storage, loc: storage).to(device)
+if isinstance(model, torch.nn.DataParallel):
+    model = model.module
+
 
 d = os.listdir(d_path)
 d = [x for x in d if x.endswith('pcm')]

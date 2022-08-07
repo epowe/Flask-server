@@ -1,12 +1,6 @@
 # from kospeech.infer_ import pred_sentence
-
-import json
-import time
-from datetime import datetime
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify
 from connections import db_connector
-import jwt
-
 from jwtUtil import valid
 
 app = Flask(__name__)
