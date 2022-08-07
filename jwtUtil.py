@@ -7,8 +7,8 @@ def valid(accessToken):
         userIdx = temp["userIdx"]
         exp = temp["exp"]
         if exp < int(time.time()):
-            return 401
+            return 401, 0
         else:
-            return 200
+            return 200, userIdx
     except:
-        return 401
+        return 401, 0
