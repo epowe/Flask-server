@@ -1,40 +1,41 @@
 # from kospeech.infer_ import pred_sentence
 
-from flask import Flask, request, jsonify
+import json
+import time
+from datetime import datetime
+from flask import Flask, request, jsonify, Response
 from connections import db_connector
 import jwt
 
+from jwtUtil import valid
+
 app = Flask(__name__)
+app.config['JSON_AS_ASCII'] = False
 app.config.from_pyfile('config.py')
-
 db = db_connector()
-
-json = {
-    "userIdx" : 1,
-    "userName" : "dongcheon"
-}
 
 # 영상 데이터 받아서 사투리 관련 데이터 DB에 저장시키는 API
 @app.route('/model/video', methods = ["POST"])
 def dialectAnalysis():
-    Jwt = request.headers['accessToken']
-
-    title = request.get_data().title
-    question = request.get_data().question
-    videoURL = request.get_data().videoURL
-
-
+    accessToken = request.headers['accessToken']
+    status, userIdx = valid(accessToken)
+    if status == 401:
+        return jsonify({"message": "유효하지 않은 토큰입니다."}), 401
+    data = request.get_json()
+    title = data["title"]
+    question = data["question"]
+    videoURL = data["videoURL"]
     print(title)
     print(question)
     print(videoURL)
-    print(Jwt)
-    return request.get_json()
+    return jsonify({"message" : "데이터 저장 완료"}), 200
 
 @app.route('/model/data/score', methods = ["GET"])
 def getDataScore():
     accessToken = request.headers['accessToken']
-    data = jwt.decode(accessToken, "asdlfjasdfasd", algorithms= "HS256")
-    userIdx = data["userIdx"]
+    status, userIdx = valid(accessToken)
+    if status == 401:
+        return jsonify({"message": "유효하지 않은 토큰입니다."}), 401
     title = request.args.get("title")
     try:
         with db.cursor() as cursor:
@@ -62,8 +63,9 @@ def getDataScore():
 @app.route('/model/score/average', methods= ["GET"])
 def getDataScoreAverage():
     accessToken = request.headers['accessToken']
-    data = jwt.decode(accessToken, "asdlfjasdfasd", algorithms="HS256")
-    userIdx = data["userIdx"]
+    status, userIdx = valid(accessToken)
+    if status == 401:
+        return jsonify({"message": "유효하지 않은 토큰입니다."}), 401
     try:
         with db.cursor() as cursor:
             getVideoTableQuery = """
@@ -106,8 +108,9 @@ def getDataScoreAverage():
 @app.route('/model/data/list', methods= ["GET"])
 def getDataList():
     accessToken = request.headers['accessToken']
-    data = jwt.decode(accessToken, "asdlfjasdfasd", algorithms="HS256")
-    userIdx = data["userIdx"]
+    status, userIdx = valid(accessToken)
+    if status == 401:
+        return jsonify({"message": "유효하지 않은 토큰입니다."}), 401
     try:
         with db.cursor() as cursor:
             query = """
@@ -141,8 +144,9 @@ def getDataList():
 @app.route('/model/data/list/question', methods = ["GET"])
 def getQuestionList():
     accessToken = request.headers['accessToken']
-    data = jwt.decode(accessToken, "asdlfjasdfasd", algorithms="HS256")
-    userIdx = data["userIdx"]
+    status, userIdx = valid(accessToken)
+    if status == 401:
+        return jsonify({"message": "유효하지 않은 토큰입니다."}), 401
     title = request.args.get("title")
     try:
         with db.cursor() as cursor:
@@ -166,8 +170,9 @@ def getQuestionList():
 @app.route('/model/data/detail', methods= ["GET"])
 def getDataDetail():
     accessToken = request.headers['accessToken']
-    data = jwt.decode(accessToken, "asdlfjasdfasd", algorithms="HS256")
-    userIdx = data["userIdx"]
+    status, userIdx = valid(accessToken)
+    if status == 401:
+        return jsonify({"message": "유효하지 않은 토큰입니다."}), 401
     title = request.args.get("title")
     question = request.args.get("question")
     try:
