@@ -23,7 +23,6 @@ def dialectAnalysis():
     question = request.get_data().question
     videoURL = request.get_data().videoURL
 
-
     print(title)
     print(question)
     print(videoURL)

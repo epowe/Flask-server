@@ -15,10 +15,6 @@ from utils import data_utils
 # model_path = os.path.join('clf','model.joblib')
 # mfcc_pipe = joblib.load('clf/model.joblib')
 
-
-
-
-
 class feature_extract():
     def __init__(self, model_path='kospeech/trained_model/model_ds2.pt'):
         self.mfcc_pipe = joblib.load('clf/model.joblib')
@@ -85,12 +81,3 @@ class feature_extract():
                 'speechRate' : self.speechRate,
                 'word' : self.word}
 
-#     feedbackList
-#     ": [{
-#     "title": "면접 제목(String)", 이미지
-#     "dialectCount": "사투리 사용 횟수(int)", 음성
-#     "intonation": "억양 점수(int)",
-#     "speechRate": "말의 빠르기 점수(int)",
-#     "word": "가장 많이 사용하는 단어(String)"
-#
-# }]
