@@ -1,7 +1,7 @@
 # from kospeech.infer_ import pred_sentence
 from flask import Flask, request, jsonify
 from connections import db_connector
-from jwtUtil import valid
+from utils.jwtUtil import valid
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -19,9 +19,40 @@ def dialectAnalysis():
     title = data["title"]
     question = data["question"]
     videoURL = data["videoURL"]
-    print(title)
-    print(question)
-    print(videoURL)
+    detail = [{
+        "dialect_time":"00:00:30.123",
+        "dialect_string":"지가",
+        "feedback" : "제가"
+    }]
+    try:
+        with db.cursor() as cursor:
+            query = """
+                insert into videoInfo(user_id, title, speech_rate, word, intonation) values(%d, "%s", 2.7, "만약", 3.88);
+                    """ % (userIdx, title)
+            cursor.execute(query)
+            query = """
+                select id from videoinfo where user_id = %d and title = "%s";
+                    """ % (userIdx, title)
+            cursor.execute(query)
+            videoInfoId = int(cursor.fetchone()[0])
+            for i in range(len(question)):
+                query = """
+                    insert into video(video_info_id, question, video_url) values(%d, "%s", "%s");
+                        """ % (videoInfoId, question[i], videoURL[i])
+                cursor.execute(query)
+                query = """
+                    select id from video where video_info_id = %d and question = "%s" and video_url = "%s";
+                        """ % (videoInfoId, question[i], videoURL[i])
+                cursor.execute(query)
+                videoId = int(cursor.fetchone()[0])
+                for feedback in detail:
+                    query = """
+                        insert into videoFeedback(video_id, dialect_time,dialect_string,feedback)values(%d, "%s", "%s", "%s");
+                            """ % (videoId, feedback["dialect_time"], feedback["dialect_string"], feedback["feedback"])
+                    cursor.execute(query)
+            db.commit()
+    finally:
+        cursor.close()
     return jsonify({"message" : "데이터 저장 완료"}), 200
 
 @app.route('/model/data/score', methods = ["GET"])
