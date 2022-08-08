@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 app.config.from_pyfile('config.py')
 db = db_connector()
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"*": {"origins": "*"}})
 # 영상 데이터 받아서 사투리 관련 데이터 DB에 저장시키는 API
 @app.route('/model/video', methods = ["POST"])
 def dialectAnalysis():
