@@ -5,7 +5,8 @@ import jwt
 from flask import Flask, request, jsonify
 from connections import db_connector
 from utils.jwtUtil import valid
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
+
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 app.config.from_pyfile('config.py')
@@ -59,6 +60,7 @@ def dialectAnalysis():
     return jsonify({"message" : "데이터 저장 완료"}), 200
 
 @app.route('/model/data/score', methods = ["GET"])
+@cross_origin()
 def getDataScore():
     Authorization = request.headers['Authorization']
     status, userIdx = valid(Authorization)
@@ -89,6 +91,7 @@ def getDataScore():
     return jsonify(json), 200
 
 @app.route('/model/score/average', methods= ["GET"])
+@cross_origin()
 def getDataScoreAverage():
     Authorization = request.headers['Authorization']
     status, userIdx = valid(Authorization)
@@ -134,6 +137,7 @@ def getDataScoreAverage():
     return jsonify(json), 200
 
 @app.route('/model/data/list', methods= ["GET"])
+@cross_origin()
 def getDataList():
     Authorization = request.headers['Authorization']
     status, userIdx = valid(Authorization)
@@ -170,6 +174,7 @@ def getDataList():
     return jsonify(json), 200
 
 @app.route('/model/data/list/question', methods = ["GET"])
+@cross_origin()
 def getQuestionList():
     Authorization = request.headers['Authorization']
     status, userIdx = valid(Authorization)
@@ -196,6 +201,7 @@ def getQuestionList():
     return jsonify(json), 200
 
 @app.route('/model/data/detail', methods= ["GET"])
+@cross_origin()
 def getDataDetail():
     Authorization = request.headers['Authorization']
     status, userIdx = valid(Authorization)
