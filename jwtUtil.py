@@ -11,6 +11,6 @@ def valid(Authorization):
         if exp < int(time.time()) or type != "Bearer":
             return 401, 0
         else:
-            return 200, userIdx
+            return 200, int(userIdx)
     except:
         return 401, 0
