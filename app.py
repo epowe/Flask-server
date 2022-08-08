@@ -11,8 +11,8 @@ db = db_connector()
 # 영상 데이터 받아서 사투리 관련 데이터 DB에 저장시키는 API
 @app.route('/model/video', methods = ["POST"])
 def dialectAnalysis():
-    accessToken = request.headers['accessToken']
-    status, userIdx = valid(accessToken)
+    Authorization = request.headers['Authorization']
+    status, userIdx = valid(Authorization)
     if status == 401:
         return jsonify({"message": "유효하지 않은 토큰입니다."}), 401
     data = request.get_json()
@@ -26,8 +26,8 @@ def dialectAnalysis():
 
 @app.route('/model/data/score', methods = ["GET"])
 def getDataScore():
-    accessToken = request.headers['accessToken']
-    status, userIdx = valid(accessToken)
+    Authorization = request.headers['Authorization']
+    status, userIdx = valid(Authorization)
     if status == 401:
         return jsonify({"message": "유효하지 않은 토큰입니다."}), 401
     title = request.args.get("title")
@@ -56,8 +56,8 @@ def getDataScore():
 
 @app.route('/model/score/average', methods= ["GET"])
 def getDataScoreAverage():
-    accessToken = request.headers['accessToken']
-    status, userIdx = valid(accessToken)
+    Authorization = request.headers['Authorization']
+    status, userIdx = valid(Authorization)
     if status == 401:
         return jsonify({"message": "유효하지 않은 토큰입니다."}), 401
     try:
@@ -101,8 +101,8 @@ def getDataScoreAverage():
 
 @app.route('/model/data/list', methods= ["GET"])
 def getDataList():
-    accessToken = request.headers['accessToken']
-    status, userIdx = valid(accessToken)
+    Authorization = request.headers['Authorization']
+    status, userIdx = valid(Authorization)
     if status == 401:
         return jsonify({"message": "유효하지 않은 토큰입니다."}), 401
     try:
@@ -137,8 +137,8 @@ def getDataList():
 
 @app.route('/model/data/list/question', methods = ["GET"])
 def getQuestionList():
-    accessToken = request.headers['accessToken']
-    status, userIdx = valid(accessToken)
+    Authorization = request.headers['Authorization']
+    status, userIdx = valid(Authorization)
     if status == 401:
         return jsonify({"message": "유효하지 않은 토큰입니다."}), 401
     title = request.args.get("title")
@@ -163,8 +163,8 @@ def getQuestionList():
 
 @app.route('/model/data/detail', methods= ["GET"])
 def getDataDetail():
-    accessToken = request.headers['accessToken']
-    status, userIdx = valid(accessToken)
+    Authorization = request.headers['Authorization']
+    status, userIdx = valid(Authorization)
     if status == 401:
         return jsonify({"message": "유효하지 않은 토큰입니다."}), 401
     title = request.args.get("title")
