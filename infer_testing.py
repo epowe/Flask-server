@@ -43,4 +43,5 @@ from extract import feature_extract
 
 extractor = feature_extract()
 
-extractor
+extractor.audio("C:\\Users\\hyunsoo\\epowe\\sampledata\\DKSR20000890.wav")
+extractor.extract()
