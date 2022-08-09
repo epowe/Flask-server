@@ -72,7 +72,7 @@ def parse_audio(audio_path: str, del_silence: bool = False, audio_extension: str
 
 
 def pred_sentence(audio_path,model,device):
-    device = torch.device('cpu')
+    # device = torch.device('cpu')
     feature = parse_audio(audio_path,del_silence=True)
 
     input_length = torch.LongTensor([len(feature)])

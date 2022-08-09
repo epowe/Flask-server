@@ -2,13 +2,17 @@ import joblib
 import os, sys
 import torch
 from torch import nn
-from kospeech.infer_ import pred_sentence
 import pydub
 import numpy as np
 import pandas as pd
 from pydub import AudioSegment
 import pydub
 from utils import data_utils
+
+from kospeech.infer_ import pred_sentence
+import torch
+import os
+from hanspell import spell_checker
 
 
 # from clf.mfcc_data import mfcc_loader\
@@ -39,6 +43,19 @@ class feature_extract():
                 'is_dialect':is_dialect,
                 'time':time}
 
+    def convert_wave_to_pcm(self, filename):
+        file = open(filename, 'rb')
+        byteBuffer = bytearray(file.read())
+        file.close()
+        fn_ext = os.path.splitext(filename)
+        if fn_ext[1] == '.wav':
+            out_filename = fn_ext[0] + '.pcm'
+        else:
+            out_filename = fn_ext[0] + fn_ext[1] + '.pcm'
+        out_file = open(out_filename, 'wb')
+        out_file.write(byteBuffer[44:])
+        out_file.close()
+        return out_filename
     def audio(self, path, min_silence_length=150, duration=3500):
         '''
         input: wav file path
@@ -74,10 +91,34 @@ class feature_extract():
             dic['end'] = time[1]
             csv.append(dic)
         self.df = pd.DataFrame(csv)
-    def extract(self, total_wav_path):
+        self.csv = os.path.join(folder,'train.csv')
+        self.df.to_csv(self.csv, index=False)
+    def extract(self, csv_path=None):
+        text = []
+        n_dialect = []
+        speechRates = []
 
-        return {'dialectCount' : self.dialectCount,
-                'intonation' : self.intonation,
-                'speechRate' : self.speechRate,
-                'word' : self.word}
+        if csv_path ==None:
+            df = pd.read_csv(self.csv)
+        for rows in df.iterrows():
+            file_path = rows['file_path']
+            start = rows['start']
+            end = rows['end']
+            pcm = self.convert_wave_to_pcm(file_path)
+            sentence = pred_sentence(pcm,self.model,self.device)
+            isDialect = self.mfcc_pipe.predict(pcm)
+            speechRate = ((end-start)/1000)/ len(sentence)
+
+            text.append(sentence)
+            n_dialect.append(isDialect[0])
+            speechRates.append(speechRate)
+
+        df['text'] = text
+        df['isDialect'] = n_dialect
+        df['speechRate'] = speechRates
+        df.to_csv('total.csv',index = None)
+        # return {'dialectCount' : dialectCount,
+        #         'intonation' : self.intonation,
+        #         'speechRate' : speechRate,
+        #         'word' : word}
 
