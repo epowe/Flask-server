@@ -1,9 +1,6 @@
-# from kospeech.infer_ import pred_sentence
-import time
-
-import jwt
 from flask import Flask, request, jsonify
 from connections import db_connector
+from utils import jwtUtil
 from utils.jwtUtil import valid
 from flask_cors import CORS, cross_origin
 
@@ -13,7 +10,7 @@ app.config.from_pyfile('config.py')
 db = db_connector()
 CORS(app, resources={r"*": {"origins": "*"}})
 # 영상 데이터 받아서 사투리 관련 데이터 DB에 저장시키는 API
-@app.route('/model/video', methods = ["POST"])
+@app.route('/api/model/video', methods = ["POST"])
 def dialectAnalysis():
     Authorization = request.headers['Authorization']
     status, userIdx = valid(Authorization)
@@ -31,27 +28,27 @@ def dialectAnalysis():
     try:
         with db.cursor() as cursor:
             query = """
-                insert into videoInfo(user_id, title, speech_rate, word, intonation) values(%d, "%s", 2.7, "만약", 3.88);
+                insert into VideoInfo(user_id, title, speech_rate, word, intonation) values(%d, "%s", 2.7, "만약", 3.88);
                     """ % (userIdx, title)
             cursor.execute(query)
             query = """
-                select id from videoinfo where user_id = %d and title = "%s";
+                select id from VideoInfo where user_id = %d and title = "%s";
                     """ % (userIdx, title)
             cursor.execute(query)
             videoInfoId = int(cursor.fetchone()[0])
             for i in range(len(question)):
                 query = """
-                    insert into video(video_info_id, question, video_url) values(%d, "%s", "%s");
+                    insert into Video(video_info_id, question, video_url) values(%d, "%s", "%s");
                         """ % (videoInfoId, question[i], videoURL[i])
                 cursor.execute(query)
                 query = """
-                    select id from video where video_info_id = %d and question = "%s" and video_url = "%s";
+                    select id from Video where video_info_id = %d and question = "%s" and video_url = "%s";
                         """ % (videoInfoId, question[i], videoURL[i])
                 cursor.execute(query)
                 videoId = int(cursor.fetchone()[0])
                 for feedback in detail:
                     query = """
-                        insert into videoFeedback(video_id, dialect_time,dialect_string,feedback)values(%d, "%s", "%s", "%s");
+                        insert into VideoFeedback(video_id, dialect_time,dialect_string,feedback)values(%d, "%s", "%s", "%s");
                             """ % (videoId, feedback["dialect_time"], feedback["dialect_string"], feedback["feedback"])
                     cursor.execute(query)
             db.commit()
@@ -59,9 +56,10 @@ def dialectAnalysis():
         cursor.close()
     return jsonify({"message" : "데이터 저장 완료"}), 200
 
-@app.route('/model/data/score', methods = ["GET"])
+@app.route('/api/model/data/score', methods = ["GET"])
 @cross_origin()
 def getDataScore():
+
     Authorization = request.headers['Authorization']
     status, userIdx = valid(Authorization)
     if status == 401:
@@ -70,12 +68,12 @@ def getDataScore():
     try:
         with db.cursor() as cursor:
             query = """
-                select videoInfo.intonation as intonation, videoInfo.speech_rate as speechRate, videoInfo.word as word, count(*) from users
-                inner join VideoInfo on users.id = VideoInfo.user_id  
+                select VideoInfo.intonation as intonation, VideoInfo.speech_rate as speechRate, VideoInfo.word as word, count(*) from Users
+                inner join VideoInfo on Users.id = VideoInfo.user_id  
                 inner join Video on VideoInfo.id = Video.video_info_id
                 inner join VideoFeedback on Video.id = VideoFeedback.video_id  
-                where users.id = %d and videoInfo.title = '%s'
-                group by videoInfo.intonation, videoInfo.speech_rate, videoInfo.word
+                where Users.id = %d and VideoInfo.title = '%s'
+                group by VideoInfo.intonation, VideoInfo.speech_rate, VideoInfo.word
                     """ % (userIdx, title)
             cursor.execute(query)
             intonation, speechRate, word, dialectCount = cursor.fetchone()
@@ -90,9 +88,11 @@ def getDataScore():
     }
     return jsonify(json), 200
 
-@app.route('/model/score/average', methods= ["GET"])
+@app.route('/api/model/score/average', methods= ["GET"])
 @cross_origin()
 def getDataScoreAverage():
+    data = jwtUtil.createToken()
+    print(data)
     Authorization = request.headers['Authorization']
     status, userIdx = valid(Authorization)
     if status == 401:
@@ -100,15 +100,15 @@ def getDataScoreAverage():
     try:
         with db.cursor() as cursor:
             getVideoTableQuery = """
-                select speech_rate, intonation, word from videoInfo
+                select speech_rate, intonation, word from VideoInfo
                 where user_Id = %s
                     """
             getDialectCountQuery = """
-                select count(VideoFeedback.id)from users
-                inner join VideoInfo on users.id = VideoInfo.user_id  
+                select count(VideoFeedback.id)from Users
+                inner join VideoInfo on Users.id = VideoInfo.user_id  
                 inner join Video on VideoInfo.id = Video.video_info_id
                 inner join VideoFeedback on Video.id = VideoFeedback.video_id
-                where user_Id = %d
+                where user_id = %d
             """ % (userIdx)
             cursor.execute(getVideoTableQuery, (userIdx, ))
             result = cursor.fetchall()
@@ -136,7 +136,7 @@ def getDataScoreAverage():
     }
     return jsonify(json), 200
 
-@app.route('/model/data/list', methods= ["GET"])
+@app.route('/api/model/data/list', methods= ["GET"])
 @cross_origin()
 def getDataList():
     Authorization = request.headers['Authorization']
@@ -146,12 +146,12 @@ def getDataList():
     try:
         with db.cursor() as cursor:
             query = """
-                    select videoinfo.title, videoInfo.intonation as intonation, videoInfo.speech_rate as speechRate, videoInfo.word as word, count(*) from users
-                    inner join VideoInfo on users.id = VideoInfo.user_id  
+                    select VideoInfo.title, VideoInfo.intonation as intonation, VideoInfo.speech_rate as speechRate, VideoInfo.word as word, count(*) from Users
+                    inner join VideoInfo on Users.id = VideoInfo.user_id  
                     inner join Video on VideoInfo.id = Video.video_info_id
                     inner join VideoFeedback on Video.id = VideoFeedback.video_id  
-                    where users.id = %d
-                    group by videoinfo.title, videoInfo.intonation, videoInfo.speech_rate, videoInfo.word
+                    where Users.id = %d
+                    group by VideoInfo.title, VideoInfo.intonation, VideoInfo.speech_rate, VideoInfo.word
                         """ % (userIdx)
             cursor.execute(query)
             result = cursor.fetchall()
@@ -173,7 +173,7 @@ def getDataList():
     }
     return jsonify(json), 200
 
-@app.route('/model/data/list/question', methods = ["GET"])
+@app.route('/api/model/data/list/question', methods = ["GET"])
 @cross_origin()
 def getQuestionList():
     Authorization = request.headers['Authorization']
@@ -184,7 +184,7 @@ def getQuestionList():
     try:
         with db.cursor() as cursor:
             query = """
-                    select question from video
+                    select question from Video
                     where video_info_id = (select id from VideoInfo where title = '%s' and user_id = %d) 
                         """ % (title, userIdx)
             cursor.execute(query)
@@ -200,7 +200,7 @@ def getQuestionList():
     }
     return jsonify(json), 200
 
-@app.route('/model/data/detail', methods= ["GET"])
+@app.route('/api/model/data/detail', methods= ["GET"])
 @cross_origin()
 def getDataDetail():
     Authorization = request.headers['Authorization']
@@ -212,10 +212,10 @@ def getDataDetail():
     try:
         with db.cursor() as cursor:
             query = """
-                    select video.video_url, videoFeedback.dialect_time, videoFeedback.dialect_string, videoFeedback.feedback from Video
+                    select Video.video_url, VideoFeedback.dialect_time, VideoFeedback.dialect_string, VideoFeedback.feedback from Video
                     inner join VideoFeedback on Video.id = VideoFeedback.video_id
-                    where video_info_id = (select id from videoInfo where user_id = %d and title = "%s")
-                    and video.question = "%s"
+                    where video_info_id = (select id from VideoInfo where user_id = %d and title = "%s")
+                    and Video.question = "%s"
                             """ % (userIdx, title, question)
             cursor.execute(query)
             result = cursor.fetchall()
@@ -241,5 +241,5 @@ def getDataDetail():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port = 5001)
 
