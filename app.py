@@ -196,6 +196,7 @@ def getQuestionList():
     json = {
         "questions": questions,
     }
+    print(questions)
     return jsonify(json), 200
 
 @app.route('/api/model/data/detail', methods= ["GET"])
@@ -239,5 +240,5 @@ def getDataDetail():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port = 5001)
+    app.run(debug=True)
 
