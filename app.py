@@ -91,8 +91,6 @@ def getDataScore():
 @app.route('/api/model/score/average', methods= ["GET"])
 @cross_origin()
 def getDataScoreAverage():
-    data = jwtUtil.createToken()
-    print(data)
     Authorization = request.headers['Authorization']
     status, userIdx = valid(Authorization)
     if status == 401:
