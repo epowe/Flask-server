@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
 from connections import db_connector
-from utils import jwtUtil
-from utils.jwtUtil import valid
+from utils.jwtUtil import valid, createToken
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
@@ -9,8 +8,8 @@ app.config['JSON_AS_ASCII'] = False
 app.config.from_pyfile('config.py')
 db = db_connector()
 CORS(app, resources={r"*": {"origins": "*"}})
-# 영상 데이터 받아서 사투리 관련 데이터 DB에 저장시키는 API
-@app.route('/api/model/video', methods = ["POST"])
+
+@app.route('/model/video', methods = ["POST"])
 def dialectAnalysis():
     Authorization = request.headers['Authorization']
     status, userIdx = valid(Authorization)
@@ -56,10 +55,9 @@ def dialectAnalysis():
         cursor.close()
     return jsonify({"message" : "데이터 저장 완료"}), 200
 
-@app.route('/api/model/data/score', methods = ["GET"])
+@app.route('/model/data/score', methods = ["GET"])
 @cross_origin()
 def getDataScore():
-
     Authorization = request.headers['Authorization']
     status, userIdx = valid(Authorization)
     if status == 401:
@@ -88,7 +86,7 @@ def getDataScore():
     }
     return jsonify(json), 200
 
-@app.route('/api/model/score/average', methods= ["GET"])
+@app.route('/model/score/average', methods= ["GET"])
 @cross_origin()
 def getDataScoreAverage():
     Authorization = request.headers['Authorization']
@@ -134,7 +132,7 @@ def getDataScoreAverage():
     }
     return jsonify(json), 200
 
-@app.route('/api/model/data/list', methods= ["GET"])
+@app.route('/model/data/list', methods= ["GET"])
 @cross_origin()
 def getDataList():
     Authorization = request.headers['Authorization']
@@ -171,7 +169,7 @@ def getDataList():
     }
     return jsonify(json), 200
 
-@app.route('/api/model/data/list/question', methods = ["GET"])
+@app.route('/model/data/list/question', methods = ["GET"])
 @cross_origin()
 def getQuestionList():
     Authorization = request.headers['Authorization']
@@ -196,10 +194,9 @@ def getQuestionList():
     json = {
         "questions": questions,
     }
-    print(questions)
     return jsonify(json), 200
 
-@app.route('/api/model/data/detail', methods= ["GET"])
+@app.route('/model/data/detail', methods= ["GET"])
 @cross_origin()
 def getDataDetail():
     Authorization = request.headers['Authorization']
@@ -238,6 +235,13 @@ def getDataDetail():
     }
     return jsonify(json), 200
 
+@app.route('/model/test/token', methods = ['GET'])
+def getTestToken():
+    userIdx = int(request.args.get("userIdx"))
+    json = {
+        "token": createToken(userIdx= userIdx)
+    }
+    return jsonify(json), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
