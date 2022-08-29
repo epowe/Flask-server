@@ -1,10 +1,14 @@
 import time
 import jwt
+from dotenv import load_dotenv
+from os import getenv
+
+load_dotenv()
 
 def valid(Authorization):
     try:
         type, accessToken = Authorization.split()
-        temp = jwt.decode(accessToken, "이에이승팀의샘플비밀키입니다.", algorithms="HS256")
+        temp = jwt.decode(accessToken, getenv("JWT_KEY"), algorithms="HS256")
         userIdx = temp["userIdx"]
         exp = temp["exp"]
 
@@ -14,3 +18,11 @@ def valid(Authorization):
             return 200, int(userIdx)
     except:
         return 401, 0
+
+def createToken(userIdx):
+    data = {
+        "userIdx": userIdx,
+        "exp": int(time.time()) + 3600000
+    }
+    encoded = jwt.encode(data, getenv("JWT_KEY"), algorithm="HS256")
+    return encoded
