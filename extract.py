@@ -1,4 +1,5 @@
 import joblib
+import moviepy.editor as moviepy
 import os, sys
 import torch
 from torch import nn
@@ -6,13 +7,11 @@ import pydub
 import numpy as np
 import pandas as pd
 from pydub import AudioSegment
-import pydub
 from utils import data_utils
 from clf.mfcc_data import mfcc_loader
 from kospeech.infer_ import pred_sentence
-import torch
-import os, sys
 from hanspell import spell_checker
+import subprocess
 packages = ['clf','kospeech','py-hanspell','utils']
 for package in packages:
     sys.path.append(package)
@@ -58,11 +57,22 @@ class feature_extract():
         out_file.write(byteBuffer[44:])
         out_file.close()
         return out_filename
+    def webm_to_wav(self,webm,wav):
+        clip = moviepy.VideoFileClip(webm)
+        clip.audio.write_audiofile(wav)
+        return wav
+
+    def convert_webm_to_wav(self,file):
+        command = ['ffmpeg', '-i', file, '-acodec', 'pcm_s16le', '-ac', '1', '-ar', '16000', file[:-5] + '.wav']
+        subprocess.run(command, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+        return file[:-5] + '.wav'
     def audio(self, path, min_silence_length=150, duration=3500):
         '''
         input: wav file path
         return: filename_start_end.pcm
         '''
+        if path.endswith('.webm'):
+            path = self.convert_webm_to_wav(path)
         dir = os.path.split(path)[0]
         file = os.path.split(path)[-1]
         csv = []
@@ -74,17 +84,19 @@ class feature_extract():
         t = []
         st = times[0][0]
         sums = 0
+        file_name = file.split('.')[0]
+        folder = os.path.join(dir, file_name)
+        os.makedirs(folder, exist_ok=True)
         for [start, end] in times:
             sums += (end - start)
             if sums >= duration:
                 t.append([st, end])
                 st = end
                 sums = 0
+        if len(t) < 1:
+            t = [[times[0][0],times[-1][-1]]]
         for idx, time in enumerate(t):
             dic = {}
-            file_name = file.split('.')[0]
-            folder = os.path.join(dir,file_name)
-            os.makedirs(folder, exist_ok=True)
             os.makedirs(os.path.join(folder,'wav'), exist_ok=True)
             file_path = os.path.join(folder,'wav',str(idx)+'.wav')
             newAudio = audio[time[0]:time[1]]
@@ -96,13 +108,16 @@ class feature_extract():
         self.df = pd.DataFrame(csv)
         self.csv = os.path.join(folder,'train.csv')
         self.df.to_csv(self.csv, index=False)
+        return self.csv
     def extract(self, csv_path=None):
         text = []
         n_dialect = []
         speechRates = []
 
         if csv_path ==None:
-            df = pd.read_csv(self.csv)
+            csv_path = self.csv
+        df = pd.read_csv(csv_path)
+        save_path = os.path.join(os.path.split(csv_path)[0],'total.csv')
         for idx, rows in df.iterrows():
             file_path = rows['file_path']
             start = rows['start']
@@ -119,7 +134,7 @@ class feature_extract():
         df['text'] = text
         df['isDialect'] = n_dialect
         df['speechRate'] = speechRates
-        df.to_csv('total.csv',encoding='utf-8-sig',index = None)
+        df.to_csv(save_path,encoding='utf-8-sig',index = None)
         # return {'dialectCount' : dialectCount,
         #         'intonation' : self.intonation,
         #         'speechRate' : speechRate,

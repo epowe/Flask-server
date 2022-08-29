@@ -43,5 +43,5 @@ from extract import feature_extract
 
 extractor = feature_extract()
 
-extractor.audio("C:\\Users\\hyunsoo\\epowe\\sampledata\\DKSR20000890.wav")
-extractor.extract()
+csv_path = extractor.audio("C:\\Users\\hyunsoo\\epowe\\sampledata\\a.webm")
+extractor.extract(csv_path=csv_path)
