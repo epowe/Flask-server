@@ -12,6 +12,8 @@ from clf.mfcc_data import mfcc_loader
 from kospeech.infer_ import pred_sentence
 from hanspell import spell_checker
 import subprocess
+from tqdm import tqdm
+
 packages = ['clf','kospeech','py-hanspell','utils']
 for package in packages:
     sys.path.append(package)
@@ -109,19 +111,21 @@ class feature_extract():
             dic['end'] = time[1]
             csv.append(dic)
         self.df = pd.DataFrame(csv)
-        self.csv = os.path.join(folder,'train.csv')
-        self.df.to_csv(self.csv, index=False)
-        return self.csv
+        # self.csv = os.path.join(folder,'train.csv')
+        # self.df.to_csv(self.csv, index=False)
+        return self.df
     def extract(self, csv_path=None):
         text = []
         n_dialect = []
         speechRates = []
-
+        detail = []
         if csv_path ==None:
-            csv_path = self.csv
-        df = pd.read_csv(csv_path)
-        save_path = os.path.join(os.path.split(csv_path)[0],'total.csv')
-        for idx, rows in df.iterrows():
+            # csv_path = self.csv
+            df = self.df
+        else:
+            df = pd.read_csv(csv_path)
+        # save_path = os.path.join(os.path.split(csv_path)[0],'total.csv')
+        for idx, rows in tqdm(df.iterrows()):
             file_path = rows['file_path']
             start = rows['start']
             end = rows['end']
@@ -129,15 +133,19 @@ class feature_extract():
             sentence = pred_sentence(pcm,self.model,self.device)
             isDialect = self.mfcc_pipe.predict(pcm)
             speechRate = ((end-start)/1000)/ len(sentence[0])
-
             text.append(sentence[0])
             n_dialect.append(isDialect[0])
             speechRates.append(speechRate)
+            if isDialect > 0:
+                dic = {}
+                dic['dialect_time'] = start
+                dic['dialect_string'] = sentence
+                detail.append(dic)
 
         df['text'] = text
         df['isDialect'] = n_dialect
         df['speechRate'] = speechRates
-        df.to_csv(save_path,encoding='utf-8-sig',index = None)
+        # df.to_csv(save_path,encoding='utf-8-sig',index = None)
 
         texts = (' '.join(df.text.to_list()))
         texts = re.sub(' +', ' ', texts).split(' ')
@@ -147,6 +155,14 @@ class feature_extract():
         dialectCount = df.isDialect.sum()
         speechRate = df.speechRate.mean()
         word = count[:5]
+
+        out = {
+            'detail':detail,
+            'speed':speechRate,
+            'words':[w[0] for w in count],
+            'words_count':[w[1] for w in count]
+        }
+        print(out)
         # return {'dialectCount' : dialectCount,
         #         'intonation' : self.intonation,
         #         'speechRate' : speechRate,
