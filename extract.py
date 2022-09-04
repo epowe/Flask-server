@@ -16,6 +16,9 @@ packages = ['clf','kospeech','py-hanspell','utils']
 for package in packages:
     sys.path.append(package)
 
+import re
+from collections import Counter
+
 # from clf.mfcc_data import mfcc_loader\
 # model_path = os.path.join('clf','model.joblib')
 # mfcc_pipe = joblib.load('clf/model.joblib')
@@ -135,8 +138,20 @@ class feature_extract():
         df['isDialect'] = n_dialect
         df['speechRate'] = speechRates
         df.to_csv(save_path,encoding='utf-8-sig',index = None)
+
+        texts = (' '.join(df.text.to_list()))
+        texts = re.sub(' +', ' ', texts).split(' ')
+        count = Counter(texts)
+        count = count.most_common()
+
+        dialectCount = df.isDialect.sum()
+        speechRate = df.speechRate.mean()
+        word = count[:5]
         # return {'dialectCount' : dialectCount,
         #         'intonation' : self.intonation,
         #         'speechRate' : speechRate,
         #         'word' : word}
+
+    # def get_word_frequency(self,df):
+    #     text =
 
