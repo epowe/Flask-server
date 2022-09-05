@@ -24,6 +24,18 @@ def dialectAnalysis():
         "dialect_string":"지가",
         "feedback" : "제가"
     }]
+    app.logger.info(title)
+    app.logger.info(question)
+    app.logger.info(videoURL)
+    app.logger.debug(title)
+    app.logger.debug(question)
+    app.logger.debug(videoURL)
+    app.logger.error(title)
+    app.logger.error(question)
+    app.logger.error(videoURL)
+    app.logger.error(userIdx)
+    app.logger.info(userIdx)
+    app.logger.debug(userIdx)
     try:
         with db.cursor() as cursor:
             query = """
