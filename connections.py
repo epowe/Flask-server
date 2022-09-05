@@ -1,6 +1,5 @@
 from config import db
-import pymysql
-
+import pymysqlpool
 def db_connector():
-    connector = pymysql.connect(**db)
-    return connector
+    pool = pymysqlpool.ConnectionPool(size=5, maxsize=100, pre_create_num=5, name="pool", **db)
+    return pool
