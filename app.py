@@ -6,11 +6,12 @@ from flask_cors import CORS, cross_origin
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 app.config.from_pyfile('config.py')
-db = db_connector()
+dbConnectionPool = db_connector()
 CORS(app, resources={r"*": {"origins": "*"}})
 
 @app.route('/model/video', methods = ["POST"])
 def dialectAnalysis():
+    db = dbConnectionPool.get_connection()
     Authorization = request.headers['Authorization']
     status, userIdx = valid(Authorization)
     if status == 401:
@@ -24,18 +25,6 @@ def dialectAnalysis():
         "dialect_string":"지가",
         "feedback" : "제가"
     }]
-    app.logger.info(title)
-    app.logger.info(question)
-    app.logger.info(videoURL)
-    app.logger.debug(title)
-    app.logger.debug(question)
-    app.logger.debug(videoURL)
-    app.logger.error(title)
-    app.logger.error(question)
-    app.logger.error(videoURL)
-    app.logger.error(userIdx)
-    app.logger.info(userIdx)
-    app.logger.debug(userIdx)
     try:
         with db.cursor() as cursor:
             query = """
@@ -70,11 +59,13 @@ def dialectAnalysis():
 @app.route('/model/data/score', methods = ["GET"])
 @cross_origin()
 def getDataScore():
+    db = dbConnectionPool.get_connection()
     Authorization = request.headers['Authorization']
     status, userIdx = valid(Authorization)
     if status == 401:
         return jsonify({"message": "유효하지 않은 토큰입니다."}), 401
     title = request.args.get("title")
+
     try:
         with db.cursor() as cursor:
             query = """
@@ -101,6 +92,7 @@ def getDataScore():
 @app.route('/model/score/average', methods= ["GET"])
 @cross_origin()
 def getDataScoreAverage():
+    db = dbConnectionPool.get_connection()
     Authorization = request.headers['Authorization']
     status, userIdx = valid(Authorization)
     if status == 401:
@@ -147,6 +139,7 @@ def getDataScoreAverage():
 @app.route('/model/data/list', methods= ["GET"])
 @cross_origin()
 def getDataList():
+    db = dbConnectionPool.get_connection()
     Authorization = request.headers['Authorization']
     status, userIdx = valid(Authorization)
     if status == 401:
@@ -184,6 +177,7 @@ def getDataList():
 @app.route('/model/data/list/question', methods = ["GET"])
 @cross_origin()
 def getQuestionList():
+    db = dbConnectionPool.get_connection()
     Authorization = request.headers['Authorization']
     status, userIdx = valid(Authorization)
     if status == 401:
@@ -211,6 +205,7 @@ def getQuestionList():
 @app.route('/model/data/detail', methods= ["GET"])
 @cross_origin()
 def getDataDetail():
+    db = dbConnectionPool.get_connection()
     Authorization = request.headers['Authorization']
     status, userIdx = valid(Authorization)
     if status == 401:
