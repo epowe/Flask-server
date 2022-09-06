@@ -45,7 +45,7 @@ jobs:
       uses: appleboy/ssh-action@master
       env: 
         IMAGE_NAME: 960377929570.dkr.ecr.ap-northeast-2.amazonaws.com/epowe:e19c67458cd9e8f358759cbb9056b380477d3801
-        AWS_ACCOUNT_ID : dd
+        AWS_ACCOUNT_ID : ${{ secrets.AWS_ACCOUNT_ID }}
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
