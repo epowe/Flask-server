@@ -55,7 +55,6 @@ jobs:
           #docker rm $(docker ps -a -q)
           #docker login
           docker login 960377929570.dkr.ecr.ap-northeast-2.amazonaws.com
-          #aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID
-          docker pull 960377929570.dkr.ecr.ap-northeast-2.amazonaws.com/epowe:e19c67458cd9e8f358759cbb9056b380477d3801
+          docker pull $IMAGE_NAME
           docker run -d -p 5000:5000 $IMAGE_NAME
           docker image prune
