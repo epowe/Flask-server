@@ -53,7 +53,7 @@ jobs:
         script: |
           docker stop $(docker ps -a -q)
           docker rm $(docker ps -a -q)
-          aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.ap-northeast-2.amazonaws.com
+          aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID
           docker pull $IMAGE_NAME
           docker run -d -p 5000:5000 $IMAGE_NAME
           docker image prune
