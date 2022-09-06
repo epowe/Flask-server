@@ -44,7 +44,6 @@ jobs:
     - name: Delete and deploy docker image
       uses: appleboy/ssh-action@master
       env: 
-        IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
         AWS_ACCOUNT_ID : ${{ secrets.AWS_ACCOUNT_ID }}
       with:
         host: ${{ secrets.HOST }}
@@ -53,7 +52,7 @@ jobs:
         script: |
           docker stop $(docker ps -a -q)
           docker rm $(docker ps -a -q)
-          docker login 960377929570.dkr.ecr.ap-northeast-2.amazonaws.com
+          docker login $AWS_ACCOUNT_ID
           docker pull 960377929570.dkr.ecr.ap-northeast-2.amazonaws.com/epowe:e19c67458cd9e8f358759cbb9056b380477d3801
           docker run -d -p 5000:5000 960377929570.dkr.ecr.ap-northeast-2.amazonaws.com/epowe:e19c67458cd9e8f358759cbb9056b380477d3801
           docker image prune
