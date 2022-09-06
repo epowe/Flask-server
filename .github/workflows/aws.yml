@@ -44,12 +44,13 @@ jobs:
     - name: Delete and deploy docker image
       uses: appleboy/ssh-action@master
       env: 
-        IMAGE_NAME: ${{ secrets.IMAGE_NAME}}
+        IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
         AWS_ACCOUNT_ID : ${{ secrets.AWS_ACCOUNT_ID }}
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.SSH_PEM_KEY }}
+        IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
         script: |
           docker stop $(docker ps -a -q)
           docker rm $(docker ps -a -q)
