@@ -191,5 +191,4 @@ kospeech/trained_model/
 #hanspell
 hanspell/
 
-config.py
 .DS_Store
