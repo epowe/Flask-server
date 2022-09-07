@@ -54,6 +54,7 @@ def dialectAnalysis():
             db.commit()
     finally:
         cursor.close()
+        db.close()
     return jsonify({"message" : "데이터 저장 완료"}), 200
 
 @app.route('/model/data/score', methods = ["GET"])
@@ -81,6 +82,7 @@ def getDataScore():
             db.commit()
     finally:
         cursor.close()
+        db.close()
     json = {
         "intonation"   : intonation,
         "speechRate"   : speechRate,
@@ -117,6 +119,7 @@ def getDataScoreAverage():
             db.commit()
     finally:
         cursor.close()
+        db.close()
     speechRateArr = []
     intonationArr = []
     wordArr = []
@@ -159,6 +162,7 @@ def getDataList():
             db.commit()
     finally:
         cursor.close()
+        db.close()
     feedbackList = []
     for title, intonation, speechRate, word, dialectCount in result:
         data = {
@@ -194,6 +198,7 @@ def getQuestionList():
             db.commit()
     finally:
         cursor.close()
+        db.close()
     questions = []
     for question in result:
         questions.append(*question)
@@ -225,6 +230,7 @@ def getDataDetail():
             db.commit()
     finally:
         cursor.close()
+        db.close()
     videoUrl = ""
     detail = []
     for url, dialectTime, dialectString, feedback in result:
