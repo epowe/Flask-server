@@ -275,6 +275,7 @@ def getCheckTitle():
         return jsonify({"message" : "사용 가능한 제목입니다."}), 200
 
 
+
 @app.route('/model/test/token', methods = ['GET'])
 def getTestToken():
     userIdx = int(request.args.get("userIdx"))
