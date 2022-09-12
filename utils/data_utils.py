@@ -1,11 +1,15 @@
 import sys
 import os.path
+import os
 import subprocess
 import sys
 import pandas as pd
 import pydub
 
-
+def add_path():
+    paths = ['kospeech','hanspell']
+    for path in paths:
+        sys.path.append(path)
 def install(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 
