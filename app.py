@@ -248,6 +248,33 @@ def getDataDetail():
     }
     return jsonify(json), 200
 
+@app.route('/model/check/title', methods = ['GET'])
+def getCheckTitle():
+    db = dbConnectionPool.get_connection()
+    Authorization = request.headers['Authorization']
+    status, userIdx = valid(Authorization)
+    if status == 401:
+        return jsonify({"message": "유효하지 않은 토큰입니다."}), 401
+    title = request.args.get("title")
+
+    try:
+        with db.cursor() as cursor:
+            query = """
+                    select * from VideoInfo
+                    where user_id = %d and title = "%s"
+                """ % (userIdx, title)
+            cursor.execute(query)
+            result = cursor.fetchall()
+            db.commit()
+    finally:
+        cursor.close()
+        db.close()
+    if result:
+        return jsonify({"message" : "중복되는 제목입니다."}), 400
+    else:
+        return jsonify({"message" : "사용 가능한 제목입니다."}), 200
+
+
 @app.route('/model/test/token', methods = ['GET'])
 def getTestToken():
     userIdx = int(request.args.get("userIdx"))
