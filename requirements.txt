@@ -66,3 +66,4 @@ urllib3==1.26.10
 Werkzeug==2.1.2
 zipp==3.8.0
 moviepy==1.0.3
+pydub==0.25.1
