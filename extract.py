@@ -1,19 +1,20 @@
 import joblib
 import moviepy.editor as moviepy
 import os, sys
+from utils import data_utils
+data_utils.add_path()
+
 import torch
 from torch import nn
 import pydub
 import numpy as np
 import pandas as pd
 from pydub import AudioSegment
-from utils import data_utils
 from clf.mfcc_data import mfcc_loader
 from kospeech.infer_ import pred_sentence
 from hanspell import spell_checker
 import subprocess
 from tqdm import tqdm
-
 packages = ['clf','kospeech','py-hanspell','utils']
 for package in packages:
     sys.path.append(package)
