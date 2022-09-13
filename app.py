@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 from connections import db_connector
 from utils.jwtUtil import valid, createToken
 from flask_cors import CORS, cross_origin
-
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 app.config.from_pyfile('config.py')
@@ -10,6 +9,7 @@ dbConnectionPool = db_connector()
 CORS(app, resources={r"*": {"origins": "*"}})
 
 @app.route('/model/video', methods = ["POST"])
+@cross_origin()
 def dialectAnalysis():
     db = dbConnectionPool.get_connection()
     Authorization = request.headers['Authorization']
@@ -249,6 +249,7 @@ def getDataDetail():
     return jsonify(json), 200
 
 @app.route('/model/check/title', methods = ['GET'])
+@cross_origin()
 def getCheckTitle():
     db = dbConnectionPool.get_connection()
     Authorization = request.headers['Authorization']
