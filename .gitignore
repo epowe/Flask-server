@@ -190,5 +190,6 @@ kospeech/trained_model/
 
 #hanspell
 hanspell/
+py-hanspell
 
 config.py
