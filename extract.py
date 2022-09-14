@@ -15,7 +15,7 @@ from kospeech.infer_ import pred_sentence
 from hanspell import spell_checker
 import subprocess
 from tqdm import tqdm
-packages = ['clf','kospeech','py-hanspell','utils']
+packages = ['clf','kospeech','hanspell','utils']
 for package in packages:
     sys.path.append(package)
 
