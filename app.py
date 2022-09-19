@@ -2,15 +2,26 @@ from flask import Flask, request, jsonify
 from connections import db_connector
 from utils.jwtUtil import valid, createToken
 from flask_cors import CORS, cross_origin
+from extract import feature_extract
+from config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_S3_BUCKET_NAME
+import boto3
+import datetime
+import os
+import shutil
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 app.config.from_pyfile('config.py')
 dbConnectionPool = db_connector()
 CORS(app, resources={r"*": {"origins": "*"}})
 
+s3_client = boto3.client(service_name="s3",
+                         aws_access_key_id=AWS_ACCESS_KEY_ID,
+                         aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+
 @app.route('/model/video', methods = ["POST"])
 @cross_origin()
 def dialectAnalysis():
+
     db = dbConnectionPool.get_connection()
     Authorization = request.headers['Authorization']
     status, userIdx = valid(Authorization)
@@ -20,16 +31,48 @@ def dialectAnalysis():
     title = data["title"]
     question = data["question"]
     videoURL = data["videoURL"]
-    detail = [{
-        "dialect_time":"00:00:30.123",
-        "dialect_string":"지가",
-        "feedback" : "제가"
-    }]
+
+    speedSum = 0
+    wordList = []
+    videoAnalysisDatas = []
+
+    for URL in videoURL:
+        fileName = URL.split("/")[-1]
+        filePath = "kospeech/data/video/" + fileName
+        s3_client.download_file(AWS_S3_BUCKET_NAME, "upload/"+fileName.replace("%3A", ":"), filePath)
+
+        # ai 모델 영상 분석
+        extractor = feature_extract()
+        extractor.audio(filePath)
+        analysisData = extractor.extract()
+
+        #만든 파일 삭제
+        if os.path.isfile(filePath):
+            os.remove(filePath)
+        if os.path.isfile(filePath[:-3]+"av"):
+            os.remove(filePath[:-3]+"av")
+        if os.path.isdir(filePath[:-5]):
+            shutil.rmtree(filePath[:-5], ignore_errors=True)
+
+        #분석 데이터 처리
+        speedSum += analysisData["speed"]
+        detail = analysisData["detail"]
+        words = analysisData["words"]
+        wordCount = analysisData["words_count"]
+        wordList += [(words[i],wordCount[i]) for i in range(len(words))]
+        for i in range(len(detail)):
+            detail[i]["dialect_time"] = (datetime.datetime.fromtimestamp(detail[i]["dialect_time"] / 1e3)-datetime.timedelta(hours=9)).strftime("%H:%M:%S.%f")
+            detail[i]["dialect_string"] = detail[i]["dialect_string"][0]
+        videoAnalysisDatas.append(detail)
+
+    wordList.sort(key=lambda x: x[1], reverse=True)
+    speedAvg = speedSum/len(question)
+
     try:
         with db.cursor() as cursor:
             query = """
-                insert into VideoInfo(user_id, title, speech_rate, word, intonation) values(%d, "%s", 2.7, "만약", 3.88);
-                    """ % (userIdx, title)
+                insert into VideoInfo(user_id, title, speech_rate, word, intonation) values(%d, "%s", %.2f, "%s", 3.88);
+                    """ % (userIdx, title, speedAvg, wordList[0][0])
             cursor.execute(query)
             query = """
                 select id from VideoInfo where user_id = %d and title = "%s";
@@ -46,10 +89,10 @@ def dialectAnalysis():
                         """ % (videoInfoId, question[i], videoURL[i])
                 cursor.execute(query)
                 videoId = int(cursor.fetchone()[0])
-                for feedback in detail:
+                for feedback in videoAnalysisDatas[i]:
                     query = """
                         insert into VideoFeedback(video_id, dialect_time,dialect_string,feedback)values(%d, "%s", "%s", "%s");
-                            """ % (videoId, feedback["dialect_time"], feedback["dialect_string"], feedback["feedback"])
+                            """ % (videoId, feedback["dialect_time"], feedback["dialect_string"], "test")
                     cursor.execute(query)
             db.commit()
     finally:

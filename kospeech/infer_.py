@@ -35,7 +35,7 @@ from kospeech.models import (
 import sys
 sys.path.append('../')
 
-from hanspell import spell_checker
+# from hanspell import spell_checker
 
 def revise(sentence):
     words = sentence[0].split()
