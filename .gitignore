@@ -185,9 +185,10 @@ pip-selfcheck.json
 
 # model
 kospeech/outputs/
-kospeech/data/
+kospeech/data/vocab/
 kospeech/trained_model/
 
+model_ds2.pt
 #hanspell
 hanspell/
 py-hanspell
