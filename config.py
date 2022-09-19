@@ -9,3 +9,7 @@ db = {
     'database' :  getenv("DB_NAME"),
     'charset' : 'utf8'
 }
+
+AWS_ACCESS_KEY_ID=getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY=getenv("EPOWE_AWS_SECRET_ACCESS_KEY")
+AWS_S3_BUCKET_NAME = getenv("AWS_S3_BUCKET_NAME")
