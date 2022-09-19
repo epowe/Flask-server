@@ -12,7 +12,6 @@ import pandas as pd
 from pydub import AudioSegment
 from clf.mfcc_data import mfcc_loader
 from kospeech.infer_ import pred_sentence
-from hanspell import spell_checker
 import subprocess
 from tqdm import tqdm
 packages = ['clf','kospeech','hanspell','utils']
@@ -27,7 +26,7 @@ from collections import Counter
 # mfcc_pipe = joblib.load('clf/model.joblib')
 
 class feature_extract():
-    def __init__(self, model_path='kospeech/trained_model/model_ds2.pt'):
+    def __init__(self, model_path='model_ds2.pt'):
         self.mfcc_pipe = joblib.load('clf/model.joblib')
         self.device = torch.device('cpu')
         self.model_path = model_path
@@ -81,6 +80,8 @@ class feature_extract():
             path = self.convert_webm_to_wav(path)
         dir = os.path.split(path)[0]
         file = os.path.split(path)[-1]
+        print(dir)
+        print(file)
         csv = []
         audio = AudioSegment.from_file(file=path,
                                        format='wav')
@@ -163,7 +164,7 @@ class feature_extract():
             'words':[w[0] for w in count],
             'words_count':[w[1] for w in count]
         }
-        print(out)
+        return out
         # return {'dialectCount' : dialectCount,
         #         'intonation' : self.intonation,
         #         'speechRate' : speechRate,
