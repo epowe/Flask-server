@@ -3,11 +3,14 @@ from connections import db_connector
 from utils.jwtUtil import valid, createToken
 from flask_cors import CORS, cross_origin
 from extract import feature_extract
-from config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_S3_BUCKET_NAME
+from config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_S3_BUCKET_NAME, NAVER_CLOVA_API_KEY, NAVER_CLOVA_API_KEY_ID
+import ssl
+import urllib.request
 import boto3
 import datetime
 import os
 import shutil
+
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 app.config.from_pyfile('config.py')
@@ -318,6 +321,36 @@ def getCheckTitle():
     else:
         return jsonify({"message" : "사용 가능한 제목입니다."}), 200
 
+@app.route('/model/voice', methods = ['POST'])
+@cross_origin()
+def getAiVoice():
+    Authorization = request.headers['Authorization']
+    status, userIdx = valid(Authorization)
+    if status == 401:
+        return jsonify({"message": "유효하지 않은 토큰입니다."}), 401
+
+    text = request.args.get("text")
+    speaker = request.args.get("speaker")
+    encText = urllib.parse.quote(text)
+    data = "speaker="+ speaker+"&volume=0&speed=0&pitch=0&format=mp3&text=" + encText;
+    url = "https://naveropenapi.apigw.ntruss.com/tts-premium/v1/tts"
+    context = ssl._create_unverified_context()
+    urlRequest = urllib.request.Request(url)
+    urlRequest.add_header("X-NCP-APIGW-API-KEY-ID", NAVER_CLOVA_API_KEY_ID)
+    urlRequest.add_header("X-NCP-APIGW-API-KEY", NAVER_CLOVA_API_KEY)
+    response = urllib.request.urlopen(urlRequest, data=data.encode('utf-8'), context=context)
+    rescode = response.getcode()
+    if (rescode == 200):
+        # print("TTS mp3 저장")
+        response_body = response.read()
+
+        print(response_body)
+        s3_client.put_object(Body = response_body, Bucket = "epowe-bucket", Key = "voice/"+speaker+".mp3")
+        # with open('1111.mp3', 'wb') as f:
+        #     f.write(response_body)
+    else:
+        return jsonify({"message": "NAVER_CLOVA_API_ERROR"}), rescode
+    return jsonify({"message" : "데이터 저장 완료"}), 200
 
 
 @app.route('/model/test/token', methods = ['GET'])
