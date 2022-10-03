@@ -68,7 +68,7 @@ class feature_extract():
             print(f"Detected language: {max(probs, key=probs.get)}")
 
             # decode the audio
-            options = whisper.DecodingOptions()
+            options = whisper.DecodingOptions(fp16=False)
             result = whisper.decode(self.model, mel, options)
             sentence = result.text
         else:
