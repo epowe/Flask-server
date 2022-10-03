@@ -162,7 +162,7 @@ class feature_extract():
             start = rows['start']
             end = rows['end']
             pcm = self.convert_wave_to_pcm(file_path)
-            sentence = pred_sentence(pcm,self.model,self.device)
+            sentence = self.predict(pcm,self.model,self.device)
             isDialect = self.mfcc_pipe.predict(pcm)
             speechRate = ((end-start)/1000)/ len(sentence[0])
             text.append(sentence[0])
