@@ -73,11 +73,12 @@ class feature_extract():
             sentence = result.text
         else:
             sentence = pred_sentence(audio_path, self.model, self.device)[0]
-        is_dialect = self.mfcc_pipe(audio_path) # {1:True, 0:False}
-        time = np.memmap(audio_path, dtype='h', mode='r').astype('float32')/self.sr
-        return {'sentence':sentence,
-                'is_dialect':is_dialect,
-                'time':time}
+        return sentence
+        # is_dialect = self.mfcc_pipe(audio_path) # {1:True, 0:False}
+        # time = np.memmap(audio_path, dtype='h', mode='r').astype('float32')/self.sr
+        # return {'sentence':sentence,
+        #         'is_dialect':is_dialect,
+        #         'time':time}
 
     def convert_wave_to_pcm(self, filename):
         file = open(filename, 'rb')
