@@ -1,5 +1,5 @@
 import joblib
-import moviepy.editor as moviepy
+# import moviepy.editor as moviepy
 import os, sys
 from utils import data_utils
 data_utils.add_path()
@@ -205,3 +205,4 @@ class feature_extract():
     # def get_word_frequency(self,df):
     #     text =
 
+fe = feature_extract()
