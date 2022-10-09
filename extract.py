@@ -31,9 +31,64 @@ import torchaudio
 
 from tqdm.notebook import tqdm
 
+import requests
+import json
+import re
+from konlpy.tag import Okt
 # from clf.mfcc_data import mfcc_loader\
 # model_path = os.path.join('clf','model.joblib')
 # mfcc_pipe = joblib.load('clf/model.joblib')
+class replace_str():
+    '''
+    usage
+    doc ='아부지가 그렇게 갈카주도 와그리 재그람이 없노? 그것도 하나 몬하나?'
+    test = replace()
+    test.replace_str(doc)
+
+    return (replace_str, replace words list)
+    '''
+    def __init__(self):
+        self.okt = Okt()
+        self.url = 'https://opendict.korean.go.kr/api/search'
+        self.params = {
+            'key':'AE47DFEE516CF24C06F80B9E6A4183DB',
+            'q':None,
+            'req_type':'json'
+        }
+    def get_words(self, word):
+        self.params['q'] = word
+        res = requests.get(self.url, params=self.params, verify=False)
+        try:
+            js = json.loads(res.content)['channel']['item']
+        except:
+            return -1
+    #     print(js)
+        outs = []
+        for w in js:
+            if w['word']==word:
+                out = [v['definition'] for v in w['sense']]
+                out_v = [s for s in out if ('방언' in s)or('사투리' in s)]
+                if len(out_v) != 0:
+                    out_v = [re.match("‘.+’",s) for s in out]
+                    out_v = [s.string[s.start()+1:s.end()-1] for s in out_v]
+                else:
+                    out_v = -1
+                if out_v != -1:
+                    outs.append(*out_v)
+        return outs
+
+    def replace_str(self, sentence):
+        replaces = sentence
+        token = self.okt.pos(sentence)
+        words = [v[0] for v in token if v[1]=='Noun']
+        words_re = [(word,self.get_words(word)) for word in words]
+        words_re = [word for word in words_re if len(word[1]) >0]
+        for word_o, word_r in [list(v) for v in words_re]:
+            if len(word_r) == 0:
+                continue
+            replaces = replaces.replace(word_o,word_r[0])
+        return replaces, words_re
+
 
 class feature_extract():
     def __init__(self, model_path='model_ds2.pt', use_whisper=True):
