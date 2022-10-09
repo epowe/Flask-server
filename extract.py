@@ -147,7 +147,7 @@ class feature_extract():
         # self.csv = os.path.join(folder,'train.csv')
         # self.df.to_csv(self.csv, index=False)
         return self.df
-    def extract(self, csv_path=None):
+    def extract(self, create_path, csv_path=None):
         text = []
         n_dialect = []
         speechRates = []
@@ -170,6 +170,7 @@ class feature_extract():
             text.append(sentence[0])
             n_dialect.append(isDialect[0])
             speechRates.append(speechRate)
+
             if isDialect > 0:
                 dic = {}
                 dic['dialect_time'] = start
@@ -179,7 +180,7 @@ class feature_extract():
         df['text'] = text
         df['isDialect'] = n_dialect
         df['speechRate'] = speechRates
-        # df.to_csv(save_path,encoding='utf-8-sig',index = None)
+        df.to_csv(create_path,encoding='utf-8-sig',index = None)
 
         texts = (' '.join(df.text.to_list()))
         texts = re.sub(' +', ' ', texts).split(' ')
