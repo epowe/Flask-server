@@ -126,3 +126,4 @@ Werkzeug==2.1.2
 whisper @ git+https://github.com/openai/whisper.git@2037b65f3f57ff5174c32dcf6c081de07aadb2d4
 widgetsnbextension==4.0.3
 zipp==3.8.0
+konlpy==0.6.0
