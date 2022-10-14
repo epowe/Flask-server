@@ -19,6 +19,7 @@ for package in packages:
 
 import re
 from collections import Counter
+from itertools import product
 
 try:
     import tensorflow  # required in Colab to avoid protobuf compatibility issues
@@ -38,23 +39,27 @@ from konlpy.tag import Okt
 # from clf.mfcc_data import mfcc_loader\
 # model_path = os.path.join('clf','model.joblib')
 # mfcc_pipe = joblib.load('clf/model.joblib')
+
+
+
 class replace_str():
     '''
     usage
     doc ='아부지가 그렇게 갈카주도 와그리 재그람이 없노? 그것도 하나 몬하나?'
-    test = replace()
+    test = replace_str()
     test.replace_str(doc)
 
-    return (replace_str, replace words list)
+    return [sentences......]
     '''
     def __init__(self):
         self.okt = Okt()
         self.url = 'https://opendict.korean.go.kr/api/search'
         self.params = {
-            'key':'AE47DFEE516CF24C06F80B9E6A4183DB',
-            'q':None,
-            'req_type':'json'
+            'key': 'AE47DFEE516CF24C06F80B9E6A4183DB',
+            'q': None,
+            'req_type': 'json'
         }
+
     def get_words(self, word):
         self.params['q'] = word
         res = requests.get(self.url, params=self.params, verify=False)
@@ -62,15 +67,14 @@ class replace_str():
             js = json.loads(res.content)['channel']['item']
         except:
             return -1
-    #     print(js)
         outs = []
         for w in js:
-            if w['word']==word:
+            if w['word'] == word:
                 out = [v['definition'] for v in w['sense']]
-                out_v = [s for s in out if ('방언' in s)or('사투리' in s)]
+                out_v = [s for s in out if ('방언' in s) or ('사투리' in s)]
                 if len(out_v) != 0:
-                    out_v = [re.match("‘.+’",s) for s in out]
-                    out_v = [s.string[s.start()+1:s.end()-1] for s in out_v]
+                    out_v = [re.match("‘.+’", s) for s in out]
+                    out_v = [s.string[s.start() + 1:s.end() - 1] for s in out_v]
                 else:
                     out_v = -1
                 if out_v != -1:
@@ -78,16 +82,36 @@ class replace_str():
         return outs
 
     def replace_str(self, sentence):
-        replaces = sentence
-        token = self.okt.pos(sentence)
-        words = [v[0] for v in token if v[1]=='Noun']
-        words_re = [(word,self.get_words(word)) for word in words]
-        words_re = [word for word in words_re if len(word[1]) >0]
-        for word_o, word_r in [list(v) for v in words_re]:
-            if len(word_r) == 0:
-                continue
-            replaces = replaces.replace(word_o,word_r[0])
-        return replaces, words_re
+        token = []
+        words_dic = []
+        for x in sentence.split():
+            token.append(self.okt.pos(x))
+        for words in token:
+            splits = []
+            for word in words:
+                if word[1] == 'Noun':
+                    word_re = self.get_words(word[0])
+                    if len(word_re) != 0:
+                        splits.append((word[0], word_re))
+                    else:
+                        splits.append(word[0])
+                else:
+                    splits.append((word[0]))
+            words_dic.append(splits)
+
+        main = []
+        for words in words_dic:
+            origin = [word[0] if type(word) == tuple else word for word in words]
+            origin = ''.join(origin)
+            rep = [origin]
+            for candidate in words:
+                if type(candidate) == tuple:
+                    for word in candidate[1]:
+                        rep.append(origin.replace(candidate[0], word))
+            main.append(rep)
+        main = list(product(*main))
+        main = [' '.join(sen) for sen in main]
+        return main
 
 
 class feature_extract():
@@ -213,6 +237,7 @@ class feature_extract():
         else:
             df = pd.read_csv(csv_path)
         # save_path = os.path.join(os.path.split(csv_path)[0],'total.csv')
+        save_path= 'total.csv'
         for idx, rows in tqdm(df.iterrows()):
             file_path = rows['file_path']
             start = rows['start']
@@ -221,8 +246,8 @@ class feature_extract():
             # sentence = self.predict(pcm,self.model,self.device)
             sentence = self.predict(file_path)
             isDialect = self.mfcc_pipe.predict(pcm)
-            speechRate = ((end-start)/1000)/ len(sentence[0])
-            text.append(sentence[0])
+            speechRate = ((end-start)/1000)/ len(sentence)
+            text.append(sentence)
             n_dialect.append(isDialect[0])
             speechRates.append(speechRate)
             if isDialect > 0:
@@ -234,7 +259,7 @@ class feature_extract():
         df['text'] = text
         df['isDialect'] = n_dialect
         df['speechRate'] = speechRates
-        # df.to_csv(save_path,encoding='utf-8-sig',index = None)
+        df.to_csv(save_path,encoding='utf-8-sig',index = None)
 
         texts = (' '.join(df.text.to_list()))
         texts = re.sub(' +', ' ', texts).split(' ')
@@ -261,3 +286,13 @@ class feature_extract():
     #     text =
 
 fe = feature_extract()
+from extract import feature_extract
+
+from utils import data_utils
+import sys
+data_utils.add_path()
+print(sys.path)
+extractor = feature_extract()
+extractor.audio("C:\\Users\\hyunsoo\\epowe\\sampledata\\test.webm")
+# csv_path = extractor.audio("C:\\Users\\hyunsoo\\epowe\\sampledata\\DKSR20000890.wav")
+extractor.extract()
