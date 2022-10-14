@@ -119,6 +119,7 @@ class feature_extract():
         self.mfcc_pipe = joblib.load('clf/model.joblib')
         self.device = torch.device('cpu')
         self.use_whisper = use_whisper
+        self.okt = Okt()
         if self.use_whisper:
             self.model = whisper.load_model("base")
         else:
@@ -262,9 +263,13 @@ class feature_extract():
         df.to_csv(save_path,encoding='utf-8-sig',index = None)
 
         texts = (' '.join(df.text.to_list()))
-        texts = re.sub(' +', ' ', texts).split(' ')
-        count = Counter(texts)
-        count = count.most_common()
+        # texts = re.sub(' +', ' ', texts).split(' ')
+
+        targets = ['Adjective', 'Adverb', 'Conjunction', 'Noun', 'Verb']
+        count = self.okt.pos(texts)
+        count = [x[0] for x in count if x[1] in targets]
+        count = Counter(count)
+        count = count.most_common(5)
 
         dialectCount = df.isDialect.sum()
         speechRate = df.speechRate.mean()
@@ -293,6 +298,6 @@ import sys
 data_utils.add_path()
 print(sys.path)
 extractor = feature_extract()
-extractor.audio("C:\\Users\\hyunsoo\\epowe\\sampledata\\test.webm")
-# csv_path = extractor.audio("C:\\Users\\hyunsoo\\epowe\\sampledata\\DKSR20000890.wav")
+# extractor.audio("C:\\Users\\hyunsoo\\epowe\\sampledata\\test.webm")
+csv_path = extractor.audio("C:\\Users\\hyunsoo\\epowe\\sampledata\\DKSR20000890.wav")
 extractor.extract()
