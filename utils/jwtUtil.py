@@ -9,7 +9,7 @@ def valid(Authorization):
     try:
         type, accessToken = Authorization.split()
         temp = jwt.decode(accessToken, getenv("JWT_KEY"), algorithms="HS256")
-        userIdx = temp["userIdx"]
+        userIdx = temp["jti"]
         exp = temp["exp"]
 
         if exp < int(time.time()) or type != "Bearer":
@@ -21,7 +21,7 @@ def valid(Authorization):
 
 def createToken(userIdx):
     data = {
-        "userIdx": userIdx,
+        "jti": userIdx,
         "exp": int(time.time()) + 3600000
     }
     encoded = jwt.encode(data, getenv("JWT_KEY"), algorithm="HS256")

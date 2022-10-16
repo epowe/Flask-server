@@ -16,7 +16,7 @@ import os
 from random import sample
 
 import argparse
-from typing_extensions import Required
+# from typing_extensions import Required
 import torch
 import torch.nn as nn
 import numpy as np
@@ -35,7 +35,7 @@ from kospeech.models import (
 import sys
 sys.path.append('../')
 
-from hanspell import spell_checker
+# from hanspell import spell_checker
 
 def revise(sentence):
     words = sentence[0].split()

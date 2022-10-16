@@ -40,8 +40,11 @@
 
 from extract import feature_extract
 
-
+from utils import data_utils
+import sys
+data_utils.add_path()
+print(sys.path)
 extractor = feature_extract()
-
-csv_path = extractor.audio("C:\\Users\\hyunsoo\\epowe\\sampledata\\a.webm")
-extractor.extract(csv_path=csv_path)
+extractor.audio("C:\\Users\\hyunsoo\\epowe\\sampledata\\a.webm")
+# csv_path = extractor.audio("C:\\Users\\hyunsoo\\epowe\\sampledata\\DKSR20000890.wav")
+extractor.extract()
