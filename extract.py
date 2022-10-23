@@ -222,7 +222,7 @@ class feature_extract():
             sentence = self.predict(file_path)
             isDialect = self.mfcc_pipe.predict(pcm)
             speechRate = ((end-start)/1000)/ len(sentence[0])
-            text.append(sentence[0])
+            text.append(sentence)
             n_dialect.append(isDialect[0])
             speechRates.append(speechRate)
 
