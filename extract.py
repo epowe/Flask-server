@@ -211,6 +211,8 @@ class feature_extract():
                 t.append([st, end])
                 st = end
                 sums = 0
+        t.append([st, end])
+
         if len(t) < 1:
             t = [[times[0][0],times[-1][-1]]]
         for idx, time in enumerate(t):
@@ -299,5 +301,5 @@ data_utils.add_path()
 print(sys.path)
 extractor = feature_extract()
 # extractor.audio("C:\\Users\\hyunsoo\\epowe\\sampledata\\test.webm")
-csv_path = extractor.audio("C:\\Users\\hyunsoo\\epowe\\sampledata\\DKSR20000890.wav")
+csv_path = extractor.audio("C:\\Users\\hyunsoo\\epowe\\main\\2022_11_1_10_5_16_849.webm")
 extractor.extract()
