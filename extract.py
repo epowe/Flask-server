@@ -211,7 +211,8 @@ class feature_extract():
                 t.append([st, end])
                 st = end
                 sums = 0
-        t.append([st, end])
+        # t.append([st, end])
+        t[-1][1] = end
 
         if len(t) < 1:
             t = [[times[0][0],times[-1][-1]]]
