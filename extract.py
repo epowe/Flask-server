@@ -22,7 +22,7 @@ from collections import Counter
 from itertools import product
 
 try:
-    import tensorflow  # required in Colab to avoid protobuf compatibility issues
+    import tensorflow
 except ImportError:
     pass
 
